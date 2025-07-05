@@ -123,6 +123,81 @@ Scenario: Add a comment to a post
 4. **Cache**: Redis for caching post lists or heavy queries.
 5. **Observability**: Prometheus + Grafana for metrics; ELK or Datadog for logging.
 
+---
+
+## **Docker Development**
+
+The project includes Docker configuration for easy development setup.
+
+### **Prerequisites**
+
+- Docker
+- Docker Compose
+
+### **Quick Start with Docker**
+
+```bash
+# Copy environment file
+cp env.example .env
+
+# Start all services (Django, PostgreSQL, Redis)
+docker compose -f docker-compose.dev.yml up
+
+# Access the application
+# Web: http://localhost:8000
+# Database: localhost:5432
+# Redis: localhost:6379
+```
+
+### **Docker Services**
+
+- **Web**: Django application with hot reload
+- **DB**: PostgreSQL 15-alpine
+- **Redis**: Redis 7-alpine
+
+### **Useful Docker Commands**
+
+```bash
+# Start in background
+docker compose -f docker-compose.dev.yml up -d
+
+# View logs
+docker compose -f docker-compose.dev.yml logs -f web
+
+# Stop all services
+docker compose -f docker-compose.dev.yml down
+
+# Rebuild and start
+docker compose -f docker-compose.dev.yml up --build
+
+# Access web container
+docker compose -f docker-compose.dev.yml exec web bash
+
+# Run Django commands
+docker compose -f docker-compose.dev.yml exec web python manage.py shell
+```
+
+---
+
+## **Production Deployment**
+
+The Docker setup is for development only. For production deployment, consider these options:
+
+### **Cloud Platforms**
+
+#### **Google Cloud Platform (GCP)**
+- **Cloud Run**: Auto-scaling, serverless
+- **GKE**: Kubernetes for complex applications
+- **Cloud SQL**: Managed PostgreSQL
+- **Memorystore**: Managed Redis
+
+#### **AWS**
+- **ECS/Fargate**: Container orchestration
+- **RDS**: Managed PostgreSQL
+- **ElastiCache**: Managed Redis
+
+---
+
 ### **Redis Caching**
 
 The API implements Redis caching for improved performance:
@@ -184,6 +259,38 @@ uv run python manage.py runserver
 uv pip install <pacote>
 uv pip freeze > requirements.txt
 ```
+
+---
+
+## **Testing**
+
+The project includes comprehensive tests with pytest, achieving over 90% code coverage.
+
+### **Run Tests**
+
+```bash
+# Run all tests
+uv run python -m pytest
+
+# Run with coverage report
+uv run python -m pytest --cov=blog --cov-report=html
+
+# Run specific test file
+uv run python -m pytest blog/tests/test_posts_endpoints.py
+
+# Run tests with verbose output
+uv run python -m pytest -v
+```
+
+### **Test Structure**
+
+- **`blog/tests/test_models.py`**: Model tests (creation, relationships, timestamps)
+- **`blog/tests/test_serializers.py`**: Serializer validation tests
+- **`blog/tests/test_posts_endpoints.py`**: Post API endpoint tests
+- **`blog/tests/test_comments_endpoints.py`**: Comment API endpoint tests
+- **`blog/tests/conftest.py`**: Shared fixtures and test data
+
+---
 
 ## Environment Configuration
 
