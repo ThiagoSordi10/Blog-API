@@ -1,8 +1,8 @@
 # Blog API
 
 [![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat\&logo=python\&logoColor=white)](https://www.python.org)
-[![Django](https://img.shields.io/badge/Django-3.2-092E20.svg?style=flat\&logo=django\&logoColor=white)](https://www.djangoproject.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-4169E1.svg?style=flat\&logo=postgresql\&logoColor=white)](https://www.postgresql.org)
+[![Django](https://img.shields.io/badge/Django-4.2-092E20.svg?style=flat\&logo=django\&logoColor=white)](https://www.djangoproject.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1.svg?style=flat\&logo=postgresql\&logoColor=white)](https://www.postgresql.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge\&logo=docker\&logoColor=white)](https://www.docker.com)
@@ -112,6 +112,52 @@ Scenario: Add a comment to a post
 | `/api/posts`               | POST   | Create a new BlogPost                                  |
 | `/api/posts/{id}`          | GET    | Retrieve a specific BlogPost with details and comments |
 | `/api/posts/{id}/comments` | POST   | Add a new Comment to the specified BlogPost            |
+
+---
+
+## **Code Quality & Pre-commit Hooks**
+
+The project uses pre-commit hooks to ensure code quality and security.
+
+### **Install Pre-commit Hooks**
+
+```bash
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Install all hooks (including pip-audit)
+uv run pre-commit install --all-files
+```
+
+### **Available Hooks**
+
+- **Black**: Code formatting (88 chars line length)
+- **Isort**: Import sorting (Black-compatible)
+- **Flake8**: Linting and style checking
+- **MyPy**: Static type checking
+- **Bandit**: Security vulnerability scanning
+- **Vulture**: Dead code detection
+- **Pip-Audit**: Dependency vulnerability scanning
+
+### **Run Hooks Manually**
+
+```bash
+# Run all hooks on all files
+uv run pre-commit run --all-files
+
+# Run specific hook
+uv run pre-commit run black --all-files
+
+# Run hooks on staged files only
+uv run pre-commit run
+```
+
+### **Skip Hooks (Emergency Only)**
+
+```bash
+# Skip hooks for a commit (not recommended)
+git commit -m "message" --no-verify
+```
 
 ---
 
