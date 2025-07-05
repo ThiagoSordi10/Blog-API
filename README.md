@@ -172,30 +172,28 @@ uv pip install <pacote>
 uv pip freeze > requirements.txt
 ```
 
----
+## Environment Configuration
 
-## **Docker**
+The project uses separate settings for development and production:
 
-* `docker-compose.dev.yml` for development.
-* `Dockerfile` for production.
+- **Development**: `settings.dev` (default)
+- **Production**: `settings.prod`
 
-```bash
-# Build images
-docker compose -f docker-compose.dev.yml build
-
-# Start services
-docker compose -f docker-compose.dev.yml up
-```
-
----
-
-## **Testing & TDD**
-
-We use **pytest** alongside Django's test framework:
+To specify which settings to use:
 
 ```bash
-poetry run pytest --cov=.
+# Development (default)
+DJANGO_SETTINGS_MODULE=settings.dev uv run python manage.py runserver
+
+# Production
+DJANGO_SETTINGS_MODULE=settings.prod uv run python manage.py runserver
 ```
 
-Tests reside in `tests/` covering models and API endpoints.
+### Environment Variables
+
+Copy `env.example` to `.env` and configure your environment variables:
+
+```bash
+cp env.example .env
+```
 
