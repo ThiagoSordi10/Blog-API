@@ -23,4 +23,4 @@ class Comment(TimeStampedModel):
     content = models.TextField()
 
     def __str__(self):
-        return f"Comentário de {self.author_name} em {self.post.title}"
+        return f"Comment by {self.author_name} on {self.post.title}"
