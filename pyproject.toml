@@ -38,6 +38,7 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "settings.dev"
+DJANGO_SETTINGS_MODULE = "settings.test"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
+testpaths = ["blog/tests"]
 addopts = "--cov=. --cov-report=html --cov-report=term-missing" 
