@@ -123,6 +123,19 @@ Scenario: Add a comment to a post
 4. **Cache**: Redis for caching post lists or heavy queries.
 5. **Observability**: Prometheus + Grafana for metrics; ELK or Datadog for logging.
 
+### **Redis Caching**
+
+The API implements Redis caching for improved performance:
+
+- **GET /api/posts**: Cached for 5 minutes
+- **GET /api/posts/{id}**: Cached for 5 minutes
+- **Cache Invalidation**: Automatically invalidated on new posts/comments
+
+Cache keys:
+- `posts_list`: List of all posts with comment count
+- `post_detail_{id}`: Individual post details with comments
+- `post_comments_{id}`: Comments for specific post
+
 ---
 
 ## **Database**
