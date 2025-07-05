@@ -1,8 +1,8 @@
 # Blog API
 
 [![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat\&logo=python\&logoColor=white)](https://www.python.org)
-[![Django](https://img.shields.io/badge/Django-3.2-092E20.svg?style=flat\&logo=django\&logoColor=white)](https://www.djangoproject.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-4169E1.svg?style=flat\&logo=postgresql\&logoColor=white)](https://www.postgresql.org)
+[![Django](https://img.shields.io/badge/Django-4.2-092E20.svg?style=flat\&logo=django\&logoColor=white)](https://www.djangoproject.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1.svg?style=flat\&logo=postgresql\&logoColor=white)](https://www.postgresql.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge\&logo=docker\&logoColor=white)](https://www.docker.com)
