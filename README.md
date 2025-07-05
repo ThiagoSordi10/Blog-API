@@ -115,6 +115,52 @@ Scenario: Add a comment to a post
 
 ---
 
+## **Code Quality & Pre-commit Hooks**
+
+The project uses pre-commit hooks to ensure code quality and security.
+
+### **Install Pre-commit Hooks**
+
+```bash
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Install all hooks (including pip-audit)
+uv run pre-commit install --all-files
+```
+
+### **Available Hooks**
+
+- **Black**: Code formatting (88 chars line length)
+- **Isort**: Import sorting (Black-compatible)
+- **Flake8**: Linting and style checking
+- **MyPy**: Static type checking
+- **Bandit**: Security vulnerability scanning
+- **Vulture**: Dead code detection
+- **Pip-Audit**: Dependency vulnerability scanning
+
+### **Run Hooks Manually**
+
+```bash
+# Run all hooks on all files
+uv run pre-commit run --all-files
+
+# Run specific hook
+uv run pre-commit run black --all-files
+
+# Run hooks on staged files only
+uv run pre-commit run
+```
+
+### **Skip Hooks (Emergency Only)**
+
+```bash
+# Skip hooks for a commit (not recommended)
+git commit -m "message" --no-verify
+```
+
+---
+
 ## **Infrastructure & Deployment**
 
 1. **Load Balancer**: Distribute traffic (e.g., AWS ALB).
