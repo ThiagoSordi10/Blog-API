@@ -21,47 +21,74 @@ class BlogCacheHelper:
     @classmethod
     def get_posts_list(cls):
         """Get cached posts list."""
-        return cache.get(cls.POSTS_LIST_KEY)
+        try:
+            return cache.get(cls.POSTS_LIST_KEY)
+        except Exception:
+            return None
     
     @classmethod
     def set_posts_list(cls, data):
         """Cache posts list data."""
-        cache.set(cls.POSTS_LIST_KEY, data, cls.CACHE_TIMEOUT)
+        try:
+            cache.set(cls.POSTS_LIST_KEY, data, cls.CACHE_TIMEOUT)
+        except Exception:
+            pass  # Silently fail if cache is not available
     
     @classmethod
     def invalidate_posts_list(cls):
         """Invalidate posts list cache."""
-        cache.delete(cls.POSTS_LIST_KEY)
+        try:
+            cache.delete(cls.POSTS_LIST_KEY)
+        except Exception:
+            pass
     
     @classmethod
     def get_post_detail(cls, post_id):
         """Get cached post detail."""
-        return cache.get(cls.POST_DETAIL_KEY.format(post_id))
+        try:
+            return cache.get(cls.POST_DETAIL_KEY.format(post_id))
+        except Exception:
+            return None
     
     @classmethod
     def set_post_detail(cls, post_id, data):
         """Cache post detail data."""
-        cache.set(cls.POST_DETAIL_KEY.format(post_id), data, cls.CACHE_TIMEOUT)
+        try:
+            cache.set(cls.POST_DETAIL_KEY.format(post_id), data, cls.CACHE_TIMEOUT)
+        except Exception:
+            pass
     
     @classmethod
     def invalidate_post_detail(cls, post_id):
         """Invalidate post detail cache."""
-        cache.delete(cls.POST_DETAIL_KEY.format(post_id))
+        try:
+            cache.delete(cls.POST_DETAIL_KEY.format(post_id))
+        except Exception:
+            pass
     
     @classmethod
     def get_post_comments(cls, post_id):
         """Get cached post comments."""
-        return cache.get(cls.POST_COMMENTS_KEY.format(post_id))
+        try:
+            return cache.get(cls.POST_COMMENTS_KEY.format(post_id))
+        except Exception:
+            return None
     
     @classmethod
     def set_post_comments(cls, post_id, data):
         """Cache post comments data."""
-        cache.set(cls.POST_COMMENTS_KEY.format(post_id), data, cls.CACHE_TIMEOUT)
+        try:
+            cache.set(cls.POST_COMMENTS_KEY.format(post_id), data, cls.CACHE_TIMEOUT)
+        except Exception:
+            pass
     
     @classmethod
     def invalidate_post_comments(cls, post_id):
         """Invalidate post comments cache."""
-        cache.delete(cls.POST_COMMENTS_KEY.format(post_id))
+        try:
+            cache.delete(cls.POST_COMMENTS_KEY.format(post_id))
+        except Exception:
+            pass
     
     @classmethod
     def invalidate_all_post_cache(cls, post_id):
@@ -73,4 +100,7 @@ class BlogCacheHelper:
     @classmethod
     def invalidate_all_cache(cls):
         """Invalidate all blog-related cache."""
-        cache.clear() 
+        try:
+            cache.clear()
+        except Exception:
+            pass 

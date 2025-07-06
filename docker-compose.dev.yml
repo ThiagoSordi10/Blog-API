@@ -11,12 +11,10 @@ services:
     volumes:
       # Bind mount for development (live code changes)
       - .:/app
-      # Exclude node_modules and other unnecessary files
-      - /app/.venv
+      # Exclude unnecessary directories and files
       - /app/__pycache__
       - /app/.pytest_cache
       - /app/htmlcov
-      - /app/.coverage
     environment:
       - DJANGO_SETTINGS_MODULE=settings.dev
       - SECRET_KEY=${SECRET_KEY}
@@ -34,8 +32,8 @@ services:
       - redis
     command: >
       sh -c "
-        uv run python manage.py migrate &&
-        uv run gunicorn blog_api.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --reload
+        python manage.py migrate &&
+        gunicorn blog_api.wsgi:application -b 0.0.0.0:8000 --reload
       "
     restart: unless-stopped
 

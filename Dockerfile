@@ -1,49 +1,72 @@
-# Stage 1: Build (install dependencies and prepare assets)
+########################################
+# Stage 1: Builder (install dependencies and prepare application)
+########################################
 FROM python:3.10-slim AS builder
 
-# Environment variables: no .pyc files, unbuffered output
+# Prevent creation of .pyc files and enable unbuffered stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    VENV_PATH=/opt/venv \
+    PATH="$VENV_PATH/bin:$PATH"
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    curl \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       build-essential \
+       libpq-dev \
+       curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv dependency manager
-RUN pip install --no-cache-dir uv
+# Create virtual environment and install uv dependency manager
+RUN python -m venv $VENV_PATH
 
-# Set work directory
+# Copy dependency descriptors
 WORKDIR /app
-
-# Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Install dependencies using uv sync with dev extras
-RUN uv sync --extra dev
+# Install uv and generate requirements.txt from lock file
+RUN pip install --no-cache-dir uv \
+    && uv export --extra dev --format requirements-txt > /tmp/requirements.txt
 
-# Copy the rest of the source code
-COPY . .
+# Copy application source code
+COPY . /app
 
-# Stage 2: Final (minimal image for production)
-FROM python:3.10-slim
+########################################
+# Stage 2: Final (production image)
+########################################
+FROM python:3.10-slim AS final
 
-# Create non-root user
-RUN useradd --create-home appuser
+# Prevent creation of .pyc files and enable unbuffered stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    VENV_PATH=/opt/venv \
+    PATH="$VENV_PATH/bin:$PATH"
 
+# Create non-root user and group
+RUN addgroup --system appuser \
+    && adduser --system --ingroup appuser appuser
+
+# Copy virtual environment and application, setting correct ownership
+COPY --from=builder --chown=appuser:appuser $VENV_PATH $VENV_PATH
+COPY --from=builder --chown=appuser:appuser /app /app
+COPY --from=builder /tmp/requirements.txt /app/requirements.txt
+
+# Install dependencies from requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt \
+    && rm /app/requirements.txt
+
+# Set up cache directory for any future needs
+RUN mkdir -p /home/appuser/.cache \
+    && chown -R appuser:appuser /home/appuser/.cache
+
+# Set working directory and user
 WORKDIR /app
-
-# Copy only the built app and venv from builder
-COPY --from=builder /app /app
-
-# Set permissions
-RUN chown -R appuser:appuser /app
 USER appuser
 
-# Expose default Gunicorn port
+# Expose port for Gunicorn
 EXPOSE 8000
 
-# Startup command: Gunicorn with ASGI
-CMD ["uv", "run", "gunicorn", "blog_api.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "--access-logfile", "-"] 
+# Start the application using Gunicorn with WSGI
+CMD ["gunicorn", "blog_api.wsgi:application", \
+     "-b", "0.0.0.0:8000", \
+     "--access-logfile", "-"]
