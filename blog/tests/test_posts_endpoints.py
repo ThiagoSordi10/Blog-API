@@ -21,7 +21,11 @@ class TestPostsListEndpoint:
         response = api_client.get(url)
         
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == []
+        # Verifica se a resposta tem a estrutura de paginação
+        assert 'count' in response.data
+        assert 'results' in response.data
+        assert response.data['count'] == 0
+        assert response.data['results'] == []
     
     def test_get_posts_list_with_posts(self, api_client, multiple_posts):
         """Test getting posts list with existing posts."""
@@ -32,10 +36,11 @@ class TestPostsListEndpoint:
         response = api_client.get(url)
         
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 3
+        assert response.data['count'] == 3
+        assert len(response.data['results']) == 3
         
         # Check structure
-        for post_data in response.data:
+        for post_data in response.data['results']:
             assert 'id' in post_data
             assert 'title' in post_data
             assert 'comment_count' in post_data
@@ -50,18 +55,21 @@ class TestPostsListEndpoint:
         response = api_client.get(url)
         
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 1
-        assert response.data[0]['comment_count'] == 2
+        assert response.data['count'] == 1
+        assert response.data['results'][0]['comment_count'] == 2
 
 
 @pytest.mark.django_db
 class TestPostsCreateEndpoint:
     """Tests for POST /api/posts endpoint."""
     
-    def test_create_post_success(self, api_client):
+    def test_create_post_success(self, api_client, sample_user):
         """Test creating a new post successfully."""
         # Limpa o cache para garantir estado limpo
         BlogCacheHelper.invalidate_all_cache()
+        
+        # Autentica o usuário
+        api_client.force_authenticate(user=sample_user)
         
         url = reverse('blog:post-list-create')
         data = {
@@ -81,9 +89,13 @@ class TestPostsCreateEndpoint:
         assert BlogPost.objects.count() == 1
         post = BlogPost.objects.first()
         assert post.title == data['title']
+        assert post.author == sample_user
     
-    def test_create_post_blank_title(self, api_client):
+    def test_create_post_blank_title(self, api_client, sample_user):
         """Test creating post with blank title."""
+        # Autentica o usuário
+        api_client.force_authenticate(user=sample_user)
+        
         url = reverse('blog:post-list-create')
         data = {
             'title': '',
@@ -94,8 +106,11 @@ class TestPostsCreateEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert 'title' in response.data
     
-    def test_create_post_missing_title(self, api_client):
+    def test_create_post_missing_title(self, api_client, sample_user):
         """Test creating post without title."""
+        # Autentica o usuário
+        api_client.force_authenticate(user=sample_user)
+        
         url = reverse('blog:post-list-create')
         data = {
             'content': 'This is a test post content.'
@@ -105,8 +120,11 @@ class TestPostsCreateEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert 'title' in response.data
     
-    def test_create_post_missing_content(self, api_client):
+    def test_create_post_missing_content(self, api_client, sample_user):
         """Test creating post without content."""
+        # Autentica o usuário
+        api_client.force_authenticate(user=sample_user)
+        
         url = reverse('blog:post-list-create')
         data = {
             'title': 'Test Post'
@@ -116,8 +134,11 @@ class TestPostsCreateEndpoint:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert 'content' in response.data
     
-    def test_create_post_whitespace_title(self, api_client):
+    def test_create_post_whitespace_title(self, api_client, sample_user):
         """Test creating post with whitespace-only title."""
+        # Autentica o usuário
+        api_client.force_authenticate(user=sample_user)
+        
         url = reverse('blog:post-list-create')
         data = {
             'title': '   ',
@@ -162,7 +183,7 @@ class TestPostDetailEndpoint:
         # Check comment structure
         for comment in response.data['comments']:
             assert 'id' in comment
-            assert 'author_name' in comment
+            assert 'author' in comment
             assert 'content' in comment
             assert 'created_at' in comment
     

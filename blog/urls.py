@@ -1,9 +1,22 @@
 from django.urls import path
-from .views import BlogPostListCreateView, BlogPostDetailView, CommentCreateView
+from .views import (
+    BlogPostListCreateView, 
+    BlogPostDetailView, 
+    CommentCreateView,
+    RegisterView,
+    LoginView,
+    UserProfileView
+)
 
 app_name = 'blog'
 
 urlpatterns = [
+    # Authentication endpoints
+    path('api/auth/register/', RegisterView.as_view(), name='register'),
+    path('api/auth/login/', LoginView.as_view(), name='login'),
+    path('api/auth/profile/', UserProfileView.as_view(), name='profile'),
+    
+    # Blog endpoints
     # GET /api/posts - List all posts with comment count
     # POST /api/posts - Create a new post
     path('api/posts/', BlogPostListCreateView.as_view(), name='post-list-create'),

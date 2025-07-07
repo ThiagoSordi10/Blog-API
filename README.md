@@ -90,6 +90,7 @@ Scenario: Add a comment to a post
 | id: UUID                                    |   |
 | title: str                                  |   |
 | content: Text                               |   |
+| author: ForeignKey → User                   |   |
 | created\_at: DateTime                       |   |
 | updated\_at: DateTime                       |   |
 | comments: List\[Comment] (reverse relation) |   |
@@ -98,20 +99,97 @@ Scenario: Add a comment to a post
 | --------------------------- | - |
 | id: UUID                    |   |
 | post: ForeignKey → BlogPost |   |
-| author\_name: str           |   |
+| author: ForeignKey → User   |   |
 | content: Text               |   |
 | created\_at: DateTime       |   |
+
+| **User** (Django Auth)      |   |
+| --------------------------- | - |
+| id: int                     |   |
+| username: str               |   |
+| email: str                  |   |
+| password: str (hashed)      |   |
+| is\_active: bool            |   |
 
 ---
 
 ## **API Routes**
 
-| Endpoint                   | Method | Action                                                 |
-| -------------------------- | ------ | ------------------------------------------------------ |
-| `/api/posts`               | GET    | List all posts with title and comment\_count           |
-| `/api/posts`               | POST   | Create a new BlogPost                                  |
-| `/api/posts/{id}`          | GET    | Retrieve a specific BlogPost with details and comments |
-| `/api/posts/{id}/comments` | POST   | Add a new Comment to the specified BlogPost            |
+### **Authentication Endpoints**
+
+| Endpoint                | Method | Action                                    | Authentication |
+| ----------------------- | ------ | ----------------------------------------- | -------------- |
+| `/api/auth/register/`   | POST   | Register a new user                       | Not required   |
+| `/api/auth/login/`      | POST   | Login and get authentication token        | Not required   |
+| `/api/auth/profile/`    | GET    | Get current user profile                  | Required       |
+
+### **Blog Endpoints**
+
+| Endpoint                   | Method | Action                                                 | Authentication |
+| -------------------------- | ------ | ------------------------------------------------------ | -------------- |
+| `/api/posts`               | GET    | List all posts with title and comment\_count           | Not required   |
+| `/api/posts`               | POST   | Create a new BlogPost                                  | **Required**   |
+| `/api/posts/{id}`          | GET    | Retrieve a specific BlogPost with details and comments | Not required   |
+| `/api/posts/{id}/comments` | POST   | Add a new Comment to the specified BlogPost            | **Required**   |
+
+---
+
+## **Authentication**
+
+The API uses **Token Authentication** for secure access to protected endpoints.
+
+### **Authentication Flow**
+
+1. **Register**: Create a new user account
+   ```bash
+   POST /api/auth/register/
+   {
+     "username": "user123",
+     "email": "user@example.com",
+     "password": "securepass123",
+     "password_confirm": "securepass123",
+     "first_name": "John",
+     "last_name": "Doe"
+   }
+   ```
+
+2. **Login**: Get authentication token
+   ```bash
+   POST /api/auth/login/
+   {
+     "username": "user123",
+     "password": "securepass123"
+   }
+   ```
+   **Response:**
+   ```json
+   {
+     "token": "your-auth-token-here",
+     "user": {
+       "id": 1,
+       "username": "user123",
+       "email": "user@example.com"
+     }
+   }
+   ```
+
+3. **Use Token**: Include in requests to protected endpoints
+   ```bash
+   Authorization: Token your-auth-token-here
+   ```
+
+### **Protected vs Public Endpoints**
+
+- **Public Endpoints** (no authentication required):
+  - `GET /api/posts/` - List all posts
+  - `GET /api/posts/{id}/` - View specific post
+  - `POST /api/auth/register/` - Register new user
+  - `POST /api/auth/login/` - Login
+
+- **Protected Endpoints** (authentication required):
+  - `POST /api/posts/` - Create new post
+  - `POST /api/posts/{id}/comments/` - Add comment
+  - `GET /api/auth/profile/` - View user profile
 
 ---
 
@@ -305,8 +383,47 @@ uv run python -m pytest --cov=blog --cov-report=html
 # Run specific test file
 uv run python -m pytest blog/tests/test_posts_endpoints.py
 
+# Run authentication tests
+uv run python -m pytest blog/tests/test_auth_endpoints.py
+
 # Run tests with verbose output
 uv run python -m pytest -v
+```
+
+### **Manual Testing Authentication**
+
+You can test the authentication endpoints manually using curl or any API client:
+
+```bash
+# 1. Register a new user
+curl -X POST http://localhost:8000/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "testpass123",
+    "password_confirm": "testpass123",
+    "first_name": "Test",
+    "last_name": "User"
+  }'
+
+# 2. Login and get token
+curl -X POST http://localhost:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "testpass123"
+  }'
+
+# 3. Create a post (requires authentication)
+curl -X POST http://localhost:8000/api/posts/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token YOUR_TOKEN_HERE" \
+  -d '{
+    "title": "My First Post",
+    "content": "This is my first post with authentication!"
+  }'
+```
 ```
 
 ### **Test Structure**
@@ -315,6 +432,7 @@ uv run python -m pytest -v
 - **`blog/tests/test_serializers.py`**: Serializer validation tests
 - **`blog/tests/test_posts_endpoints.py`**: Post API endpoint tests
 - **`blog/tests/test_comments_endpoints.py`**: Comment API endpoint tests
+- **`blog/tests/test_auth_endpoints.py`**: Authentication endpoint tests
 - **`blog/tests/conftest.py`**: Shared fixtures and test data
 
 ---
