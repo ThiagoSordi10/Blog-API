@@ -86,19 +86,16 @@ class TestCommentSerializer:
     def test_comment_serializer_valid_data(self):
         """Test CommentSerializer with valid data."""
         data = {
-            'author_name': 'John Doe',
             'content': 'This is a test comment with more than 5 characters.'
         }
         serializer = CommentSerializer(data=data)
         
         assert serializer.is_valid()
-        assert serializer.validated_data['author_name'] == 'John Doe'
         assert serializer.validated_data['content'] == 'This is a test comment with more than 5 characters.'
     
     def test_comment_serializer_short_content(self):
         """Test CommentSerializer with content shorter than 5 characters."""
         data = {
-            'author_name': 'John Doe',
             'content': 'Hi'
         }
         serializer = CommentSerializer(data=data)
@@ -109,7 +106,6 @@ class TestCommentSerializer:
     def test_comment_serializer_whitespace_content(self):
         """Test CommentSerializer with whitespace-only content."""
         data = {
-            'author_name': 'John Doe',
             'content': '   '
         }
         serializer = CommentSerializer(data=data)
@@ -117,21 +113,9 @@ class TestCommentSerializer:
         assert not serializer.is_valid()
         assert 'content' in serializer.errors
     
-    def test_comment_serializer_missing_author_name(self):
-        """Test CommentSerializer without author name."""
-        data = {
-            'content': 'This is a test comment.'
-        }
-        serializer = CommentSerializer(data=data)
-        
-        assert not serializer.is_valid()
-        assert 'author_name' in serializer.errors
-    
     def test_comment_serializer_missing_content(self):
         """Test CommentSerializer without content."""
-        data = {
-            'author_name': 'John Doe'
-        }
+        data = {}
         serializer = CommentSerializer(data=data)
         
         assert not serializer.is_valid()
@@ -140,13 +124,22 @@ class TestCommentSerializer:
     def test_comment_serializer_exact_minimum_length(self):
         """Test CommentSerializer with exactly 5 characters."""
         data = {
-            'author_name': 'John Doe',
             'content': '12345'
         }
         serializer = CommentSerializer(data=data)
         
         assert serializer.is_valid()
         assert serializer.validated_data['content'] == '12345'
+    
+    def test_comment_serializer_strips_whitespace(self):
+        """Test that CommentSerializer strips whitespace from content."""
+        data = {
+            'content': '  This is a test comment.  '
+        }
+        serializer = CommentSerializer(data=data)
+        
+        assert serializer.is_valid()
+        assert serializer.validated_data['content'] == 'This is a test comment.'
     
     def test_comment_serializer_strips_whitespace(self):
         """Test that CommentSerializer strips whitespace from content."""
@@ -178,7 +171,7 @@ class TestBlogPostDetailSerializer:
         # Check comment structure
         for comment in data['comments']:
             assert 'id' in comment
-            assert 'author_name' in comment
+            assert 'author' in comment
             assert 'content' in comment
             assert 'created_at' in comment
     
